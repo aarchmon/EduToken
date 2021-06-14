@@ -1,0 +1,43 @@
+pragma solidity ^0.5.0;
+
+import "./EduTokenCoin.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/Crowdsale.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/emission/MintedCrowdsale.sol";
+
+
+contract EduTokenCoinCrowdsale is Crowdsale, MintedCrowdsale { 
+    constructor(
+        uint256 rate, 
+        address payable wallet, 
+        EduTokenCoin token 
+    )
+      public Crowdsale(rate, wallet, token)
+    {
+        // constructor can stay empty
+    }
+}
+
+
+contract EduTokenCoinCrowdsaleDeployer {
+    address public edutoken_address;
+    address public edutoken_crowdsale_address;
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        address payable wallet
+    ) public {
+        EduTokenCoin token = new EduTokenCoin(name, symbol, 0);
+        edutoken_address = address(token);
+
+        
+        EduTokenCoinCrowdsale edutoken_crowdsale =
+            new EduTokenCoinCrowdsale(1, wallet, token);
+
+        edutoken_crowdsale_address = address(edutoken_crowdsale);
+
+    
+        token.addMinter(edutoken_crowdsale_address);
+        token.renounceMinter();
+    }
+}
